@@ -1,5 +1,8 @@
 # frontend
 
-Vite + React + TypeScript のスタブです。起動手順はリポジトリ直下の README を見てください。
+メモ CRUD の React UI です。起動方法とデモ用 URL はリポジトリ直下の README を参照してください。
 
-API のベース URL は `VITE_API_BASE_URL` です。
+```bash
+npm install
+npm run dev
+```

@@ -220,7 +220,7 @@ run: npm ci && npm run build
 
 ## Backend イメージ
 
-ローカル用の `infra/docker/backend.Dockerfile`（air）は ECS に載ません。本番は `infra/docker/backend.prod.Dockerfile` です。非 root、`backend/cmd/server` の静的バイナリ、RDS の TLS 用に CA 証明書を含みます。`backend/` がこのブランチに無い間はビルドできません。API の実装が入ってから `scripts/push-backend.sh` を実行します。
+ローカル用の `infra/docker/backend.Dockerfile`（air）は ECS に載ません。本番は `infra/docker/backend.prod.Dockerfile` です。非 root、`backend/cmd/server` の静的バイナリ、RDS の TLS 用に CA 証明書を含みます。push は `scripts/push-backend.sh` です。
 
 push 先は apply が作る ECR です。リポジトリ名は `memo-app-<env>-backend` で、直近 10 イメージだけ残します。
 

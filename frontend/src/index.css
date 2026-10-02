@@ -1,0 +1,52 @@
+:root {
+  font-family: "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.5;
+  color: #1c1917;
+  background: #f6f3ee;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 40rem;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+p {
+  margin: 0 0 1.5rem;
+}
+
+dl {
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+dt {
+  font-size: 0.85rem;
+  color: #57534e;
+}
+
+dd {
+  margin: 0.25rem 0 0;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  word-break: break-all;
+}
+
+.error {
+  color: #b91c1c;
+}

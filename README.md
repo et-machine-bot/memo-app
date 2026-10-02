@@ -98,8 +98,10 @@ migrate -path backend/migrations -database "$DATABASE_URL" up
 
 `DB_USER` / `DB_PASSWORD` / `DB_NAME` は `.env.example` の `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` と同じです（ユーザーと DB 名は `memo`）。`DB_HOST` はホスト用の `localhost` です。
 
-## Backend への引き継ぎ
+## API
 
-- 接続情報は上記の `DB_*` を使ってください。Compose 内のホスト名は `db`、ポートは `5432` です。
-- 成功時の `GET /api/health` は `{"status":"ok"}` のままにしてください。Postgres への ping を含みます。
-- CRUD のパスは `/api/memos` です。ルータは chi を推奨します。このスタブは標準ライブラリの `net/http` だけです。
+メモ CRUD は既存の `net/http` ServeMux に載っています。接続先は `DB_*`、待ち受けは `HTTP_ADDR`、CORS は `CORS_ORIGIN` です。マイグレーション適用前は CRUD が 500 になります。エンドポイントと curl は [backend/README.md](backend/README.md) です。
+
+- `GET /api/health` … `200` `{"status":"ok"}`。Postgres に届かないときは `503` `{"status":"unavailable"}`
+- `GET /api/memos` … `updated_at` 降順
+- `GET /api/memos/{id}` / `POST /api/memos` / `PUT /api/memos/{id}` / `DELETE /api/memos/{id}`

@@ -29,6 +29,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", handler.Health(db))
+	handler.MountMemos(mux, store.NewMemoStore(db))
 
 	server := &http.Server{
 		Addr:              cfg.HTTPAddr,

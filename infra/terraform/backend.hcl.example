@@ -1,0 +1,13 @@
+# Copy to backend.hcl (gitignored) and run:
+#   terraform init -backend-config=backend.hcl
+#
+# Create the bucket and lock table first. Commands are in README.md.
+# Do not commit this file after you fill in the bucket name.
+# dev and prod need different keys. Example prod key:
+#   memo-app/prod/terraform.tfstate
+
+bucket         = "memo-app-tfstate-ACCOUNT_ID"
+key            = "memo-app/dev/terraform.tfstate"
+region         = "ap-northeast-1"
+dynamodb_table = "memo-app-terraform-locks"
+encrypt        = true

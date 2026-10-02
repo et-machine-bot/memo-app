@@ -4,7 +4,7 @@
 
 Frontend の画面（EAS-94）はインメモリのモックデータで動きます。API 接続は EAS-95 です。
 
-本番の AWS 構成（S3 + CloudFront、ECS Fargate + ALB、RDS）はこのリポジトリの別タスクです。この README の手順に Terraform は含まれません。
+本番の AWS 構成（S3 + CloudFront、ECS Fargate + ALB、RDS PostgreSQL）は [infra/terraform/README.md](infra/terraform/README.md) です。適用手順はそちらにあり、この README の Compose 手順とは別です。
 
 ## 起動
 
@@ -105,7 +105,8 @@ backend/                  Go API
   internal/handler/       HTTP
   internal/store/         PostgreSQL 接続
   migrations/             golang-migrate（memos）
-infra/docker/             ローカル用 Dockerfile
+infra/docker/             ローカル用 Dockerfile と本番用 backend.prod.Dockerfile
+infra/terraform/          本番 AWS（Terraform）
 docker-compose.yml
 .env.example
 ```

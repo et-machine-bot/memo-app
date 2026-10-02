@@ -1,6 +1,8 @@
 # memo-app
 
-メモアプリのモノレポです。ローカルでは Docker Compose で frontend / backend / PostgreSQL を起動します。
+短いテキストメモを作成・一覧・編集・削除する Web アプリです。ローカルでは Docker Compose で frontend / backend / PostgreSQL を起動します。
+
+Frontend の画面（EAS-94）はインメモリのモックデータで動きます。API 接続は EAS-95 です。
 
 本番の AWS 構成（S3 + CloudFront、ECS Fargate + ALB、RDS）はこのリポジトリの別タスクです。この README の手順に Terraform は含まれません。
 
@@ -25,6 +27,16 @@ docker compose down
 
 データベースのボリュームも消す場合は `docker compose down -v` です。
 
+Compose を使わず frontend だけ起動する場合:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+ブラウザで http://localhost:5173 を開きます。
+
 ## URL とポート
 
 | サービス | ホストから | コンテナ内 |
@@ -37,11 +49,27 @@ docker compose down
 
 成功時のレスポンスは `{"status":"ok"}` です。Postgres に届かないときは `503` と `{"status":"unavailable"}` を返します。
 
+## 画面の確認
+
+Frontend はモックのメモ CRUD です。
+
+| URL | 内容 |
+| --- | --- |
+| `/` | メモ一覧（最初に読み込み表示のあと、モック4件） |
+| `/?list=empty` | 空状態 |
+| `/?list=loading` | 読み込み中（約4秒） |
+| `/?list=error` | 読み込み失敗。再試行で一覧へ |
+| `/new` | 新規作成。空の内容は保存できない |
+| `/new?saveError=1` | 最初の保存だけ失敗し、再試行で成功 |
+| `/memos/11111111-1111-4111-8111-111111111111/edit?saveError=1` | 更新失敗と再試行 |
+
+`list` と `saveError` はページを開いたときのデモ用です。通常の操作では、全件削除で空状態、保存中はボタンが「保存中…」になり、成功すると「メモを保存しました」を表示します。
+
 ## サービス同士の見つけ方
 
 ブラウザは Compose の DNS 名を解決できません。frontend が呼ぶ API は、ホストに公開した backend の URL です。
 
-- Frontend → Backend: 環境変数 `VITE_API_BASE_URL`（既定 `http://localhost:8080`）。Vite が開発サーバ起動時に読みます。
+- Frontend → Backend: 環境変数 `VITE_API_BASE_URL`（既定 `http://localhost:8080`）。Vite が開発サーバ起動時に読みます。EAS-94 の画面はまだこの URL へ通信しません。
 - Backend → PostgreSQL: Compose が backend コンテナに `DB_HOST=db` と `DB_PORT=5432` を渡します。アプリは `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` / `DB_SSLMODE` から接続先を決めます。
 - CORS: backend は `CORS_ORIGIN`（既定 `http://localhost:5173`）を許可します。
 
@@ -70,7 +98,7 @@ cd backend && go run ./cmd/server
 ## レイアウト
 
 ```
-frontend/                 React + TypeScript (Vite)
+frontend/                 React + TypeScript (Vite)。メモ CRUD UI
 backend/                  Go API
   cmd/server/             エントリポイント
   internal/config/        環境変数

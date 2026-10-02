@@ -1,6 +1,14 @@
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 
+const PREVIEW_LIMIT = 40;
+
+function previewSnippet(content: string): string {
+  const chars = [...content.trim()];
+  if (chars.length <= PREVIEW_LIMIT) return content;
+  return `${chars.slice(0, PREVIEW_LIMIT - 1).join("")}…`;
+}
+
 export function DeleteConfirmDialog({
   content,
   pending,
@@ -66,7 +74,7 @@ export function DeleteConfirmDialog({
         <p id="delete-dialog-desc" className="modal-desc">
           この操作は取り消せません。選択したメモが完全に削除されます。
         </p>
-        <div className="modal-preview">{content}</div>
+        <div className="modal-preview">{previewSnippet(content)}</div>
         <div className="modal-actions">
           <button ref={cancelRef} type="button" className="btn btn-ghost" onClick={onCancel} disabled={pending}>
             キャンセル

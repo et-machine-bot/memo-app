@@ -15,6 +15,7 @@ export function MemoListPage() {
   const navigate = useNavigate();
   const [pendingDelete, setPendingDelete] = useState<Memo | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const showList = status === "ready" && memos.length > 0;
 
   useEffect(() => {
@@ -52,14 +53,25 @@ export function MemoListPage() {
         <DeleteConfirmDialog
           content={pendingDelete.content}
           pending={deleting}
+          error={deleteError}
           onCancel={() => {
-            if (!deleting) setPendingDelete(null);
+            if (!deleting) {
+              setPendingDelete(null);
+              setDeleteError(null);
+            }
           }}
           onConfirm={() => {
             const target = pendingDelete;
             setDeleting(true);
+            setDeleteError(null);
             void deleteMemo(target.id)
-              .then(() => setPendingDelete(null))
+              .then(() => {
+                setPendingDelete(null);
+                setDeleteError(null);
+              })
+              .catch(() => {
+                setDeleteError("削除に失敗しました。もう一度お試しください。");
+              })
               .finally(() => setDeleting(false));
           }}
         />

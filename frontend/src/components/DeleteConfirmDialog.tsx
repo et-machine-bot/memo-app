@@ -12,11 +12,13 @@ function previewSnippet(content: string): string {
 export function DeleteConfirmDialog({
   content,
   pending,
+  error,
   onCancel,
   onConfirm,
 }: {
   content: string;
   pending: boolean;
+  error?: string | null;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -75,6 +77,11 @@ export function DeleteConfirmDialog({
           この操作は取り消せません。選択したメモが完全に削除されます。
         </p>
         <div className="modal-preview">{previewSnippet(content)}</div>
+        {error && (
+          <p className="modal-error" role="alert" data-testid="delete-error">
+            {error}
+          </p>
+        )}
         <div className="modal-actions">
           <button ref={cancelRef} type="button" className="btn btn-ghost" onClick={onCancel} disabled={pending}>
             キャンセル

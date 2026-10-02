@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -20,19 +19,11 @@ func Health(db DBPinger) http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		if err := db.PingContext(ctx); err != nil {
 			log.Printf("health: database ping failed: %v", err)
 			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "unavailable"})
 			return
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-	}
-}
-
-func writeJSON(w http.ResponseWriter, status int, body any) {
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(body); err != nil {
-		log.Printf("health: write response: %v", err)
 	}
 }

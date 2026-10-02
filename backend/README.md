@@ -1,6 +1,44 @@
 # backend
 
-Go API（`cmd/server`）と PostgreSQL マイグレーション。HTTP はヘルスチェックまでのスタブで、メモ CRUD ハンドラ（EAS-93）は含まない。
+Go API（`cmd/server`）と PostgreSQL マイグレーション。
+
+メモ CRUD は `/api` 配下です。ルータは EAS-91 の `net/http` ServeMux のままです。`content` は trim し、空と 10,000 文字超は `400` です。UPDATE は `updated_at` を必ず現在時刻にします。
+
+## API
+
+| Method | Path | 成功 |
+| --- | --- | --- |
+| GET | `/api/health` | `200` `{"status":"ok"}` |
+| GET | `/api/memos` | `200` `Memo[]`（`updated_at` 降順） |
+| GET | `/api/memos/{id}` | `200` `Memo` |
+| POST | `/api/memos` | `201` `Memo` |
+| PUT | `/api/memos/{id}` | `200` `Memo` |
+| DELETE | `/api/memos/{id}` | `204` 空ボディ |
+
+`Memo` は `id`（uuid）、`content`、`created_at`、`updated_at`（RFC3339）です。失敗時:
+
+```json
+{ "error": { "code": "validation_error", "message": "content is required" } }
+```
+
+`code` は `validation_error`（400）、`not_found`（404）、`internal_error`（500）です。500 の詳細はサーバログだけに出します。
+
+マイグレーション適用後の例（`HTTP_ADDR` の既定は `:8080`）:
+
+```bash
+curl -sS -X POST http://localhost:8080/api/memos \
+  -H 'Content-Type: application/json' \
+  -d '{"content":"hello"}'
+
+curl -sS http://localhost:8080/api/memos
+curl -sS http://localhost:8080/api/memos/<id>
+
+curl -sS -X PUT http://localhost:8080/api/memos/<id> \
+  -H 'Content-Type: application/json' \
+  -d '{"content":"updated"}'
+
+curl -sS -D - -o /dev/null -X DELETE http://localhost:8080/api/memos/<id>
+```
 
 ## スキーマ
 

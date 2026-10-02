@@ -1,8 +1,6 @@
 # backend
 
-Go API 用のモジュール置き場。このディレクトリの現時点の成果物は PostgreSQL マイグレーションのみ。
-
-メモ CRUD ハンドラ（EAS-93）はここには含まない。`go.mod` は後続の API 実装が同じモジュールパスを使えるように置いた足場である。
+Go API（`cmd/server`）と PostgreSQL マイグレーション。HTTP はヘルスチェックまでのスタブで、メモ CRUD ハンドラ（EAS-93）は含まない。
 
 ## スキーマ
 
@@ -25,41 +23,25 @@ Go API 用のモジュール置き場。このディレクトリの現時点の�
 
 ## マイグレーションの適用
 
-接続先は環境変数で渡す。パスワードやホストをリポジトリに書かない。
-
-| 変数 | 説明 |
-| --- | --- |
-| `POSTGRES_HOST` | ホスト。Compose ネットワーク内は `db`、ホスト側から公開ポートへ繋ぐときは `localhost` |
-| `POSTGRES_PORT` | ポート。通常 `5432` |
-| `POSTGRES_USER` | ユーザー |
-| `POSTGRES_PASSWORD` | パスワード |
-| `POSTGRES_DB` | データベース名 |
-| `DATABASE_URL` | golang-migrate に渡す接続文字列 |
-
-Compose のサービス名・ポートは Infra（EAS-91）が用意する。典型値はホスト `db` または `localhost`、ポート `5432`。
+接続先は [`.env.example`](../.env.example) をコピーして組み立てる。パスワードはリポジトリの別ファイルに書かない。
 
 ```bash
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
-export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=postgres
-export POSTGRES_DB=memo
+cp .env.example .env
+docker compose up -d db
+set -a && . ./.env && set +a
 
-export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
-```
+# ホストから公開ポートへ。DB_* は .env.example のホスト用（DB_HOST=localhost）。
+# DB_USER / DB_PASSWORD / DB_NAME は POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB と同じ。
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSLMODE}"
 
-`POSTGRES_PASSWORD` の例はローカル開発用のプレースホルダ。本番の値は Secrets Manager などから注入する。
-
-CLI の例（モジュールルートは `backend/`）:
-
-```bash
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.20.1
-
 migrate -path migrations -database "$DATABASE_URL" up
 migrate -path migrations -database "$DATABASE_URL" down 1
 ```
 
 リポジトリルートから実行する場合は `-path backend/migrations` にする。
+
+Compose ネットワーク内から適用する場合はホストを `db`、ポートを `5432` にする。ユーザー・パスワード・DB 名は `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` を使う。
 
 - `up` で `memos` とインデックスを作成する
 - `down 1` でインデックスとテーブルを削除する（golang-migrate の `schema_migrations` はツール側が管理する）

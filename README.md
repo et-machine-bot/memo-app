@@ -76,15 +76,29 @@ backend/                  Go API
   internal/config/        環境変数
   internal/handler/       HTTP
   internal/store/         PostgreSQL 接続
-  migrations/             スキーマ（次タスク）
+  migrations/             golang-migrate（memos）
 infra/docker/             ローカル用 Dockerfile
 docker-compose.yml
 .env.example
 ```
 
-## Backend への引き継ぎ
+## マイグレーション
 
-マイグレーション（golang-migrate、`backend/migrations/`）はこのスタブにはまだありません。
+`memos` の SQL は `backend/migrations/` にあります。適用手順の詳細は [backend/README.md](backend/README.md) です。
+
+ホストから公開ポートの Postgres へ適用する例:
+
+```bash
+cp .env.example .env
+docker compose up -d db
+set -a && . ./.env && set +a
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSLMODE}"
+migrate -path backend/migrations -database "$DATABASE_URL" up
+```
+
+`DB_USER` / `DB_PASSWORD` / `DB_NAME` は `.env.example` の `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` と同じです（ユーザーと DB 名は `memo`）。`DB_HOST` はホスト用の `localhost` です。
+
+## Backend への引き継ぎ
 
 - 接続情報は上記の `DB_*` を使ってください。Compose 内のホスト名は `db`、ポートは `5432` です。
 - 成功時の `GET /api/health` は `{"status":"ok"}` のままにしてください。Postgres への ping を含みます。
